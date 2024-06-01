@@ -12,7 +12,7 @@ $ gcc roulette.c -o roulette
 ```
 2. Execute:
 ```
-$ ./roulette [first argument] [second argument]
+$ ./roulette <first argument> <second argument>
 ```
   1. The first argument is the number of populations to be extracted.
   2. The second argument is the number of extracts.
