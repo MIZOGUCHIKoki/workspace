@@ -1,0 +1,5 @@
+# Common items
+.DS_Store
+# Roulette 
+Roulette/*
+!*.c
