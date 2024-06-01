@@ -1,8 +1,10 @@
 # Roulette 
 Roulette/*
-!*.c
 
+# Others
+Others/*
 
 # Common items
 .DS_Store
 !*.md
+!*.c
