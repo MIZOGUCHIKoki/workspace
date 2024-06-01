@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     if (counter == size)
       break;
   }
-  printf("-----------------\n");
+  printf("------+----------\n");
   return 0;
 }
 
