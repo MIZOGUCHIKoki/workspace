@@ -1,5 +1,8 @@
-# Common items
-.DS_Store
 # Roulette 
 Roulette/*
 !*.c
+
+
+# Common items
+.DS_Store
+!*.md
