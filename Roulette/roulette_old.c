@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
     counter++;
     if (counter == size) break;
   }
-  printf("-----------------\n");
+  printf("------+----------\n");
   return 0;
 }
 
