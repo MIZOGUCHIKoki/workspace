@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-#define BUF 63
+#define BUF 10
 
 int main() {
   unsigned int sec;
@@ -13,12 +13,8 @@ int main() {
   int offset = 32;
   char str[BUF];
   int i = 0;
-  for (i = 0; i <= 25; i++) {
-    str[i] = 0x41 + i;
-    str[i+26] = 0x41 + offset + i;
-  }
   for (i = 0; i < 10; i++) {
-    str[52 + i] = 0x30 + i;
+    str[i] = 0x30 + i;
   }
   for (i = 0; i < BUF; i++) {
     printf("%c ", str[i]);
