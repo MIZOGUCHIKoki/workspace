@@ -1,6 +1,7 @@
+This program is for teaching training in April 2024.
 # Description of each file
 
-* `arrayTest.c`: This is for checking array-related behavior.
+* `arrayTest.c`: This is for array-related behavior.
 * `roulette.c`: This is a roulette file.
 * `roulette_old.c`: This is a legacy roulette file.
 
