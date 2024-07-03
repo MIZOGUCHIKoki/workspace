@@ -14,13 +14,16 @@ int main(int argc, char *argv[]) {
    printf("%10d\n", a);
    switch((unsigned int)(a % 3)) {
      case 0:
-      //printf("%3d : 桜スカイホテル 柏\n", b);
+      printf("%3d : 桜スカイホテル 柏\n", b);
       break;
      case 1:
-      //printf("%3d : 三井ガーデンホテル\n", b);
+      printf("%3d : 三井ガーデンホテル\n", b);
       break;
      case 2:
-      //printf("%3d : KSEA\n", b);
+      printf("%3d : KSEA\n", b);
+      break;
+     default:
+      printf("ERROR\n");
       break;
    }
  }
