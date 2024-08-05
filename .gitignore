@@ -11,4 +11,5 @@ SortAlgorithm/*
 .DS_Store
 !*.md
 !*.c
-Makefile
+!*.h
+!Makefile
