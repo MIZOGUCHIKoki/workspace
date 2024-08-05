@@ -1,7 +1,8 @@
 CC = gcc
 CFLAGS = 
-OBJS = operateData.o binarySearch.o
-TARGETS = selectionSort
+SUB_OBJS = pushHeap.o
+OBJS = operateData.o binarySearch.o $(SUB_OBJS)
+TARGETS = heapSort
 
 all: $(TARGETS)
 	@echo "----- EXCEC -----"
