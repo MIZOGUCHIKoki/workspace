@@ -27,8 +27,7 @@ void selectionSort(unsigned int data[]) {
 				max = data[j];
 			}
 		}
-		data[max_indent] = data[i];
-		data[i] = max;
+		swap(data, max_indent, i);
 	}
 	return;
 }
