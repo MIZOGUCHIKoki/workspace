@@ -29,10 +29,11 @@ void pushHeapFromData(unsigned int data[], unsigned int heapTree[]) {
 }
 
 void deleteMaximumFromData(unsigned int heapTree[], unsigned int data[]) {
-	int i = dataSize - 1;
+	unsigned int i = dataSize - 1;
 	printf("delete maximum\n");
-	for (i = dataSize - 1; i >= 0; i--) {
+	for (i = dataSize - 1; i > 0; i--) {
 		data[i] = deleteMaximum(heapTree, i);
 	}
+	data[0] = deleteMaximum(heapTree, i);
 	return;
 }
