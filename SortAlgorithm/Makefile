@@ -3,7 +3,7 @@ CFLAGS =
 SUB_OBJS = heapOperation.o
 
 OBJS = dataOperation.o binarySearch.o $(SUB_OBJS)
-TARGETS = heapSort
+TARGETS = insertSort
 
 all: $(TARGETS)
 	@echo "----- EXCEC -----"
