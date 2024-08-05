@@ -48,3 +48,9 @@ void verifySort(unsigned int data[], unsigned int original[]) {
 	printf("Sort Success\n");
 }
 
+void swap(unsigned int data[], unsigned int index_1, unsigned int index_2) {
+	unsigned int x = data[index_1];
+	data[index_1] = data[index_2];
+	data[index_2] = x;
+	return;
+}
