@@ -33,7 +33,7 @@ void verifySort(unsigned int data[], unsigned int original[]) {
 	unsigned int j = 0;
 	for (i = 0; i < dataSize - 1; i++) {
 		if (data[i] > data[i + 1]) {
-			fprintf(stderr, "Sort Failed\n");
+			fprintf(stderr, "Sort Failed.\n data[%3d] <-> data[%3d]\n", i, i + 1);
 			j = 1;
 			break;
 		}
