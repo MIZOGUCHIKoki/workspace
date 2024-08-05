@@ -1,7 +1,8 @@
 CC = gcc
 CFLAGS = 
-SUB_OBJS = pushHeap.o
-OBJS = operateData.o binarySearch.o $(SUB_OBJS)
+SUB_OBJS = heapOperation.o
+
+OBJS = dataOperation.o binarySearch.o $(SUB_OBJS)
 TARGETS = heapSort
 
 all: $(TARGETS)
