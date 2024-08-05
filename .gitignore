@@ -4,7 +4,11 @@ Roulette/*
 # Others
 Others/*
 
+# SortAlgorighm
+SortAlgorithm/*
+
 # Common items
 .DS_Store
 !*.md
 !*.c
+Makefile
