@@ -1,24 +1,20 @@
 #include <stdio.h>
 #include "sort.h"
 
-unsigned int selectionSort(unsigned int data[]);
+void selectionSort(unsigned int data[]);
 
 int main() {
-	unsigned int i, j;
 	unsigned int data[dataSize], original[dataSize];
 	createData(data, original);
 	printData(data);
-	if ((j = selectionSort(data)) != 0) {
-		fprintf(stderr, "selection Sorf failed. Error %d\n", j);
-	} else {
-		printf("The data has sorted.\n");
-	}
+	selectionSort(data);
 	printData(data);
 	verifySort(data, original);
 	return 0;
 }
 
-unsigned int selectionSort(unsigned int data[]) {
+void selectionSort(unsigned int data[]) {
+	printf("--- Sorting ---\n");
 	unsigned int max;
 	unsigned int max_indent;
 	unsigned int i, j;
@@ -34,5 +30,5 @@ unsigned int selectionSort(unsigned int data[]) {
 		data[max_indent] = data[i];
 		data[i] = max;
 	}
-	return 0;
+	return;
 }
