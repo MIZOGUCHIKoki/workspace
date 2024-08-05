@@ -19,6 +19,14 @@ void printData(unsigned int data[]) {
 	}
 }
 
+void printDataVert(unsigned int data[]) {
+	unsigned int i;
+	for (i = 0; i < dataSize; i++) {
+		printf("%2d ", data[i]);
+	}
+	printf("\n");
+}
+
 
 void verifySort(unsigned int data[], unsigned int original[]) {
 	unsigned int i;
