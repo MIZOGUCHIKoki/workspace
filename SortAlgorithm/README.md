@@ -1,4 +1,4 @@
-## Included sort algorithms
+## Sorting Algorithms included in the dir
 * `selectionSort.c`: selection sort
 * `insertSort.c`: insert sort
 * `heapSort.c`: heap sort
