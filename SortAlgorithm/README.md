@@ -15,3 +15,9 @@ Heap sort is required `heapOperation.c`, so set sub-object `heapOperation.o` to 
 ```
 SUB_OBJS = heapOperation.o
 ```
+
+Set `dataSize` in `sort.h`, as follows if you want to change data size to sort.
+
+```
+#define dataSize 1000
+```
