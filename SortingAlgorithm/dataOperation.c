@@ -6,6 +6,7 @@
 void createData(unsigned int data[], unsigned int original[]) {
 	unsigned int i;
 	srand(time(NULL)); // set a random seed
+	//srand(1);
 	for (i = 0; i < dataSize; i++) {
 		data[i] = (unsigned int)(rand() % dataSize);
 		original[i] = data[i];
@@ -31,6 +32,7 @@ void printDataVert(unsigned int data[]) {
 void verifySort(unsigned int data[], unsigned int original[]) {
 	unsigned int i;
 	unsigned int j = 0;
+	unsigned int result[dataSize] = {0};
 	for (i = 0; i < dataSize - 1; i++) {
 		if (data[i] > data[i + 1]) {
 			fprintf(stderr, "Sort Failed.\n data[%3d] <-> data[%3d]\n", i, i + 1);
@@ -40,8 +42,11 @@ void verifySort(unsigned int data[], unsigned int original[]) {
 	}
 	if (j == 1) return;
 	for (i = 0; i < dataSize; i++) {
-		if (binarySearch(data, original[i])) {
-			fprintf(stderr, "binarySearch Failed\n");
+		binarySearch(data, original[i], result, i);
+	}
+	for (i = 0; i < dataSize; i++) {
+		if (original[i] != result[i]) {
+			fprintf(stderr, "Binary search Failed\n");
 			return;
 		}
 	}
