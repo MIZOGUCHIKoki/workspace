@@ -6,7 +6,7 @@ unsigned int partition(unsigned int data[], unsigned int left, unsigned int righ
 
 int main() {
 	unsigned int data[dataSize], original[dataSize];
-	createData(original, data);
+	createData(data, original);
 	printf("ORIGINAL\n >> ");
 	printDataVert(data);
 	printf("\n");
@@ -24,9 +24,10 @@ void quickSort(unsigned int data[], unsigned int left, unsigned int right) {
 	if (left < right) {
 		unsigned int pivod_index = partition(data, left, right);
 		printf("pivod_index = %d\n", pivod_index);
-		if (pivod_index == 0) return; // ??
-		printf(">> CALL(1) quickSort(left = %u, right = %u)\n", left, pivod_index - 1);
-		quickSort(data, left, pivod_index - 1);
+		if (pivod_index != 0) { 
+			printf(">> CALL(1) quickSort(left = %u, right = %u)\n", left, pivod_index - 1);
+			quickSort(data, left, pivod_index - 1);
+		}
 		printf(">> CALL(2) quickSort(left = %u, right = %u)\n", pivod_index + 1, right);
 		quickSort(data, pivod_index + 1, right);
 	}
