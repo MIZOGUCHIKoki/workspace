@@ -19,8 +19,8 @@ int main() {
 }
 
 void quickSort(unsigned int data[], unsigned int left, unsigned int right) {
-	printDataVert(data);
-	printf(">>> left = %u, right = %u\n", left, right);
+	//printDataVert(data);
+	//printf(">>> left = %u, right = %u\n", left, right);
 	if (left < right) {
 		unsigned int pivod_index = partition(data, left, right);
 		printf("pivod_index = %d\n", pivod_index);
@@ -44,7 +44,7 @@ unsigned int partition(unsigned int data[], unsigned int left, unsigned int righ
 	printf("CALLED partition(), Data[%u] = %u is selected as a pivod value\n", k, data[k]);
 	swap(data, k, right);
 	int i = left, j = right - 1;
-	printDataVert(data);
+	//printDataVert(data);
 	while (1) {
 		if (i > j) { 
 			printf("Break while i = %u, j = %u\n", i, j);
@@ -58,12 +58,12 @@ unsigned int partition(unsigned int data[], unsigned int left, unsigned int righ
 		if (i < j) {
 			swap(data, i, j);
 			printf("swapped data[%u] <-> data[%u]\n -> ", i, j);
-			printDataVert(data);
+			//printDataVert(data);
 		}
 	}       
 	printf("swapped as final process\n i = %u, j = %u\n", i , j);
 	swap(data, i, right); // set pivod value to mid of the set.
-	printDataVert(data);
+	//printDataVert(data);
 	printf("\n");
 	return i; // return the pivod value location
 }
