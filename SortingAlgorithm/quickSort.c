@@ -20,7 +20,6 @@ int main() {
 
 void quickSort(unsigned int data[], unsigned int left, unsigned int right) {
 	//printDataVert(data);
-	if ((right + 1 == 0) || (left + 1 == 0)) return;
 	if (left < right) {
 		unsigned int pivod_index = partition(data, left, right);
 		//printf("pivod_index = %d\n", pivod_index);
@@ -51,7 +50,7 @@ unsigned int partition(unsigned int data[], unsigned int left, unsigned int righ
 		//printf("debug point(0)\n i = %u, j = %u\n", i, j);
 		while (data[i] < data[right]) {i++;}
 		//printf("debug point(1)\n i = %u, j = %u\n", i, j);
-		while (data[j] >= data[right] && j >= i) {j--;}
+		while (data[j] >= data[right] && j >= i && j > 0) {j--;}
 		//printf("debug point(2)\n");
 		if (i < j) {
 			swap(data, i, j);
