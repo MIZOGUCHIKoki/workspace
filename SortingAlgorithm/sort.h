@@ -1,4 +1,4 @@
-#define dataSize 10
+#define dataSize 100000
 
 void createData(unsigned int data[], unsigned int original[]);
 void printData(unsigned int data[]);
