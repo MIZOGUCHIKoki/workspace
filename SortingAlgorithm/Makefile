@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = 
-SUB_OBJS = heapOperation.o
+SUB_OBJS = 
 
 OBJS = dataOperation.o binarySearch.o $(SUB_OBJS)
 TARGETS = quickSort

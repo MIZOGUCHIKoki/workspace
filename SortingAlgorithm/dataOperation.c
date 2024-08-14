@@ -23,7 +23,8 @@ void printData(unsigned int data[]) {
 void printDataVert(unsigned int data[]) {
 	unsigned int i;
 	for (i = 0; i < dataSize; i++) {
-		printf("%2d ", data[i]);
+		printf("%5d ", data[i]);
+		if (i % 17 == 0) printf("\n");
 	}
 	printf("\n");
 }
