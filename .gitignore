@@ -5,7 +5,10 @@ Roulette/*
 Others/*
 
 # SortAlgorighm
-SortAlgorithm/**/*
+SortAlgorithm/*
+
+#workspace
+workspace/*
 
 # Common items
 .DS_Store
