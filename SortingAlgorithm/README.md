@@ -18,6 +18,6 @@ SUB_OBJS = heapOperation.o
 
 Set `dataSize` in `sort.h`, as follows if you want to change data size to sort.
 
-```
+```c
 #define dataSize 1000
 ```
