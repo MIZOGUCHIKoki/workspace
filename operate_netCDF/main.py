@@ -1,6 +1,7 @@
 import netCDF4 as nc
+import csv, math
 
-netcdf_file_path = 'GFED5_Beta_daily_202012.nc' # Path to the netCDF file
+netcdf_file_path = 'GFED5_Beta_daily_200201.nc' # Path to the netCDF file
 
 ndata  = nc.Dataset(netcdf_file_path, 'r') # Open the netCDF file in read mode
 
@@ -13,25 +14,38 @@ ndata_var = ndata.variables.keys()
 # print(ndata_var) # Print the variables in the netCDF file
 
 lon = ndata.dimensions['lon']
-XNUM = len(lon)
+XNUM = len(lon) # 経度/1440
 lat = ndata.dimensions['lat']
-YNUM = len(lat)
+YNUM = len(lat) # 緯度/720
 time = ndata.dimensions['time']
-TNUM = len(time)
+TNUM = len(time) # 時間/366
 
-print("(XNUM(lon/経度), YNUM(lat/緯度), TNUM(time)) = (",XNUM,", ",YNUM,", ",TNUM,")")
 
-# print(ndata.variables['lon'][:]) # 経度
-# print(ndata.variables['lat'][:]) # 緯度
+print("(XNUM(lon/経度), YNUM(lat/緯度), TNUM(time)) = (",XNUM,", ",YNUM,", ",TNUM,")") 
 
-# for x in ndata_var:
-#     print(x, ndata.variables[x][:])
-# print(ndata.variables['CO2'][:])
+csv_file_path_Total = 'output/Total.csv'
+writer = csv.writer(open(csv_file_path_Total), 'w')
+list = []
+sum = 0
+for t in range(TNUM):
+    for x in range(XNUM):
+        for y in range(YNUM):
+            sum = sum + ndata['C'][t][y][x]
+        pro_bar = ('=' * math.floor((x/XNUM) * 100)) + (' ' * (100 - math.floor((x/XNUM) * 100)))
+        print('\r[{0}] {1}/{2} [{3}%]'.format(pro_bar, x, XNUM, round(((x/XNUM) * 100),2)), end='')
+    list.append([t + 1, sum])
+    print(sum,", ",list)
+    sum = 0
 
-# for x in range(XNUM):
-#     for y in range(YNUM):
-#         for t in range(TNUM):
-#             print("(",x,",",y,",",t,")")
-#             if ndata.variables['C'][t][y][x] != 0:
-#                 print("(",x,",",y,",",t,") :", ndata.variables['C'][t][y][x])
+print(list)
+writer.writerows(list)
+writer.close()
 
+
+# 1日ごとのCの量を横：経度，縦：緯度でCSVを書き出す．
+# ファイル名は，output/LONxLAT_n.csv (n = day(1-31))
+for x in range(TNUM):
+    csv_file_path_LxL = 'output/LONxLAT_'+ str(x+1) +'.csv' # Path to the CSV file
+    writer = csv.writer(open(csv_file_path_LxL, 'w'))
+    writer.writerows(ndata.variables['C'][x][:][:])
+    writer.close()
