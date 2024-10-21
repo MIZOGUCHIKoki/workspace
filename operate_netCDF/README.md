@@ -61,7 +61,7 @@ Enter the examples in `Terminal.app`.
     ```bash
     $ mkdir output
     ```
-1. Fix the `*.nc` file in `main.py`.
+1. Fix the `[subject].nc` file in `main.py`.
     ```python
     netcdf_file_path = 'xxx.nc' # Path to the netCDF file
     ```
