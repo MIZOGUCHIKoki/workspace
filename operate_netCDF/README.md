@@ -8,8 +8,7 @@
 The following is an example of the construction of the environment for macOS.
 Enter the examples in `Terminal.app`.
 
-1. Install `brew` on your machine. (`brew` is a package management system.)
-
+1. Install `brew` if your machine doesn't have it. (`brew` is a package management system.)
     ```bash
     $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     ```
@@ -45,6 +44,10 @@ Enter the examples in `Terminal.app`.
     >>> from netCDF4 import Dataset
     ```
     If no any errors, You may success to construct the environment.
+1. When you break from the virtual environment, enter the following command.
+    ```bash
+    $ deactivate
+    ```
 # Notes
 1. netCDF ファイルから，緯度・経度・時間・炭素(C)を取り出す．
 1. 1⽇単位の，全ての経度・緯度の炭素のデータを⾜す．（31日分）
