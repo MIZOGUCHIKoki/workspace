@@ -6,6 +6,12 @@
     - Mon Oct. 21, 2024.
 - Data resources
     - [GFED5 gruidded files](https://www.globalfiredata.org/data.html) Accessed-on: Oct. 21, 2024.
+
+# Popose of the code
+1. Extract the `Latitude`, `Longitude`, `date`, and value of`carbon(C) attibute` data from `netCDF`.
+1. Output the sum of value of `carbon(C) attribute` to CSV by date.
+1. Output the value of `carbon(C) attribute` for the number of days to CSV with columns for longitude and rows for latitude.
+
 # Environment construction for `netCDF4`?
 The following is an example of the construction of the environment for macOS.
 Enter the examples in `Terminal.app`.
