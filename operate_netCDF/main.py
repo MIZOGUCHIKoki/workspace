@@ -35,7 +35,7 @@ for t in range(TNUM):
         pro_bar = ('=' * math.floor((x/XNUM) * 100)) + (' ' * (100 - math.floor((x/XNUM) * 100)))
         print('\r[{0}] {1}/{2} [{3}%]'.format(pro_bar, x, XNUM, round(((x/XNUM) * 100),2)), end='')
     writer.writerow([t + 1, sum])
-    print(x + 1,", ",sum)
+    print(t + 1,", ",sum)
     sum = 0
 
 print(list)
