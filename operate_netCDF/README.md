@@ -45,11 +45,25 @@ Enter the examples in `Terminal.app`.
     $ python3
     >>> from netCDF4 import Dataset
     ```
-    If no any errors, You may success to construct the environment.
-1. When you break from the virtual environment, enter the following command.
+    If there are no errors, You may succeed in constructing the environment.
+1. Enter the following command When you break from the virtual environment.
     ```bash
     $ deactivate
     ```
+# How to run this code?
+1. Create an `output` directory on the top layer.
+    ```bash
+    $ mkdir output
+    ```
+1. Fix the `*.nc` file in `main.py`.
+    ```python
+    netcdf_file_path = 'xxx.nc' # Path to the netCDF file
+    ```
+1. Run `main.py` with the following command.
+    ```bash
+    $ python3 main.py
+    ```
+
 # Notes
 1. netCDF ファイルから，緯度・経度・時間・炭素(C)を取り出す．
 1. 1⽇単位の，全ての経度・緯度の炭素のデータを⾜す．（31日分）
