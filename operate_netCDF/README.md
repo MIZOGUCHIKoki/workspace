@@ -1,9 +1,11 @@
 # operate_netCDF
 - Contributor
     - MIZOGUCHI Koki(Kochi University of Technology, Japan.)
-    <!-- - YAJIMA Risa(Ibaraki University, Japan.) -->
+    - YAJIMA Risa(Ibaraki University, Japan.)
 - Created at
     - Mon Oct. 21, 2024.
+- Data resources
+    - [GFED5 gruidded files](https://www.globalfiredata.org/data.html) Accessed-on: Oct. 21, 2024.
 # Environment construction for `netCDF4`?
 The following is an example of the construction of the environment for macOS.
 Enter the examples in `Terminal.app`.
