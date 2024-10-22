@@ -25,28 +25,28 @@ TNUM = len(time) # 時間/366
 print("(XNUM(lon/経度), YNUM(lat/緯度), TNUM(time)) = (",XNUM,", ",YNUM,", ",TNUM,")") 
 
 csv_file_path_Total = 'output/Total.csv'
-writer = csv.writer(open(csv_file_path_Total, 'wt'))
-list = []
+f = open(csv_file_path_Total, 'w')
+writer = csv.writer(f, delimiter=",")
+writer.writerow(['day', 'C'])
 sum = 0
+list = []
 for t in range(TNUM):
     for x in range(XNUM):
         for y in range(YNUM):
             sum = sum + ndata['C'][t][y][x]
-        pro_bar = ('=' * math.floor((x/XNUM) * 100)) + (' ' * (100 - math.floor((x/XNUM) * 100)))
-        print('\r[{0}] {1}/{2} [{3}%]'.format(pro_bar, x, XNUM, round(((x/XNUM) * 100),2)), end='')
     writer.writerow([t + 1, sum])
+    list.append([t + 1, sum])
     print(t + 1,", ",sum)
+    print(list)
     sum = 0
-
-print(list)
-# writer.writerows(list)
-writer.close()
+f.close()
 
 
 # 1日ごとのCの量を横：経度，縦：緯度でCSVを書き出す．
 # ファイル名は，output/LONxLAT_n.csv (n = day(1-31))
 for x in range(TNUM):
     csv_file_path_LxL = 'output/LONxLAT_'+ str(x+1) +'.csv' # Path to the CSV file
-    writer = csv.writer(open(csv_file_path_LxL, 'wt'))
+    f = open(csv_file_path_LxL, 'w')
+    writer = csv.writer(f, delimiter=",")
     writer.writerows(ndata.variables['C'][x][:][:])
-    writer.close()
+    f.close()
