@@ -16,3 +16,4 @@ workspace/*
 !*.c
 !*.h
 !Makefile
+a.out
