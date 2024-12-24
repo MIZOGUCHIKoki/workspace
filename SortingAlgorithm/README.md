@@ -1,7 +1,8 @@
 ## Sorting Algorithms included in the dir
-* `selectionSort.c`: selection sort
-* `insertSort.c`: insert sort
-* `heapSort.c`: heap sort
+* `selectionSort.c`: Selection sort
+* `insertSort.c`: Insert sort
+* `heapSort.c`: Heap sort
+* `quickSort.c`: Quick sort
 
 ## How to use?
 If you want to execute `xxxSort.c`, set the sort to the target of `Makefile`, as follows.
