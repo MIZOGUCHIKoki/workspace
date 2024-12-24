@@ -12,6 +12,7 @@
       * selection sort (`selectionSort.c`)
       * insert sort (`insertSort.c`)
       * heap sort (`heapSort.c`)
+      * quick sort (`quickSort.c`)
    * Release: Augst 5, 2024.
   
    
