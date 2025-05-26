@@ -37,16 +37,17 @@ x_axis_width = 1e1
 
 # Plot the cumulative distribution
 plt.figure(figsize=(10, 5))
-plt.plot(sorted_packet_size, cumulative_distribution, label='Cumulative Distribution', drawstyle='default', linewidth=1.5, color='#1f77b4')
-
+plt.plot(sorted_packet_size, cumulative_distribution, label='Cumulative Distribution', drawstyle='steps-post', linewidth=1.5, color='#1f77b4')
+plt.axhline(0.5, linestyle='-.', color='gray', label='Median (50%)')
+plt.axhline(0.9, linestyle=':', color='gray', label='90th Percentile')
 plt.title('Cumulative Distribution of Packet Sizes')
 plt.xlabel('Packet Size (bytes)')
-plt.ylabel('Cumulative Size (MB)')
+plt.ylabel('Cumulative Distribution')
 plt.ylim(0, 1)
 plt.xlim(0, (x_axis_max // x_axis_width + 1) * x_axis_width)
 plt.grid()
 plt.gca().yaxis.set_major_locator(ticker.MultipleLocator(y_axis_width))
 plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(x_axis_width))
-plt.legend()
+plt.legend(loc='lower right')
 plt.tight_layout()
 plt.savefig('plot_cdf.pdf')

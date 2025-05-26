@@ -1,0 +1,190 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{listings,color,xcolor}
+\usepackage[margin=15truemm]{geometry}
+\lstset{
+    language = {Python},
+    %backgroundcolor={\color[gray]{.90}},
+    breaklines = true,
+    breakindent = 10pt,
+    basicstyle = \ttfamily\small,
+    commentstyle = {\ttfamily \color[cmyk]{1,0.4,1,0}},
+    classoffset = 0,
+    keywordstyle = {\bfseries \color[cmyk]{0,1,0,0}},
+    stringstyle = {\ttfamily \color[rgb]{0,0,1}},
+    frame = single,
+    %他オプション：leftline，topline，bottomline，lines，single，shadowbox
+    framesep = 5pt,
+    numbers = left,
+    stepnumber = 1,
+    numberstyle = \small,
+    tabsize = 4,
+    captionpos = t,
+}
+\title{Information and Communication Systems\\ Assignments Discussion and Results}
+\author{MIZOGUCHI Koki\thanks{Student ID: 20253656\\ The Guraduate University for Advanced Studies, SOKENDAI.\\ National Institute of Informatics, Takakura Lab. \\ Email: \texttt{mizoguchi-koki@nii.ac.jp}}}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+	This document presents the discussion, results, and code for the three assignemnts in the course of Information and Communication Systems.
+	All codes are written in Python, and attached in the appendix.
+\end{abstract}
+\section{Environment Setup}
+The environment is set up using Docker.
+The Dockerfile and docker-compose file are provided in the appendix (lst.\ref{Dockerfile} and lst.\ref{docker-compose}).
+The requirements for the Python packages are specified in the \texttt{requirements.txt} file in the appendix (lst.\ref{requirements}).
+
+Moreover, I implemented the basic data operation functions, such as getting maximum, minimum, mean, median of the data, and sorting the data using quick sort algorithm.
+These functions are contained in the \texttt{utils.py} file, which is shown in the appendix (lst.\ref{utils}).
+To ensure the correctness of the quick sort function, I wrote a sort verification script, which is contained in the \texttt{utils.py} file.
+
+Furthermore, for all assignments, \texttt{numpy}, which is a fundamental package for scientific computing with Python, and other useful tools are not used in order to better understand the basic data operation and reasoning behind the algorithms.
+\section{Assignment 1:\\ Time-Series Analysis}
+The result is shown in Figure \ref{fig:time_series_analysis}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\textwidth,keepaspectratio]{../src/plot_time_series.pdf}
+	\caption{Time-Series Analysis Results}
+	\label{fig:time_series_analysis}
+\end{figure}
+According to the result, the network traffic volume is basicly stable among the time, staying around 20KB to 40KB.
+However, there is two spikes in the traffic volume in the approximately 150ms to 200ms range and the approximately 400ms to 550ms range.
+This spike in the 400ms to 500ms are not isolated or momentary, but rather they presist sustained for approximately 150ms.
+The truly anomalous outliers typically appear as a few isolated points.
+In contrast, this kind of prolonged increase may indicate regular network behavior such as backup progresses, peak-time traffic congestion, or scheduled network events.
+For the slight spike in the 150ms to 200ms range, I am unsure what causes it without further information.
+
+To analyze the effect of the spikes and the periods of higher traffic volume, the median and the mean of the traffic volume are plotted in the same figure, which is shown in Figure \ref{fig:time_series_analysis_avg_median}.
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=.8\textwidth,keepaspectratio]{../src/plot_time_series_avg-median.pdf}
+	\caption{Time-Series Analysis with Median and Mean}
+	\label{fig:time_series_analysis_avg_median}
+\end{figure}
+The result shows that the median and the mean of the traffic volume are nearly equal, suggesting that symmetric distribution of the traffic volume without significant outliers and skewness.
+The time-series analysis is implemented in the \texttt{time-series.py} file, which is shown in the appendix (lst.\ref{time-series}).
+
+\section{Assignment 2:\\ Cumulative Distribution Function (CDF)}
+Cumulative Distribution Function (CDF) is a function that describes the probability that a random variable takes on a value less than or equal to a given value as follows:
+\begin{align}
+	\mathit{CDF}(x) = P(X \leq x)
+\end{align}
+,where \(X\) is a random variable and \(x\) is a given value.
+For the discrete random variable, the CDF is defined as:
+\begin{align}
+	\mathit{CDF}(x) = \sum_{x_i \leq x} P(X = x_i) = \frac{\lfloor{x}\rfloor}{N}, &  & \sum_{i=1}^{N} P(X = x_i) = 1
+\end{align}
+,where \(N\) is the total number of samples and \(\lfloor{x}\rfloor\) is the integer number of samples that are less than or equal to \(x\).
+
+The CDF is shown in Figure \ref{fig:cdf}.
+The CDF of the discrate random variable is not cotinuous graph, but rather a step function.
+Thus, the \texttt{drawstyle}, which is a parameter of the \text{matplotlib.pyplot.plot} function, is set to \texttt{steps-post} to draw the CDF as a step function.
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.8\textwidth,keepaspectratio]{../src/plot_cdf.pdf}
+	\caption{Cumulative Distribution Function (CDF)}
+	\label{fig:cdf}
+\end{figure}
+
+The cumulative probability of the packet size increases sharply around approximately 50 to 60 bytes.
+It indicates that most of the packets size are approximately 50 to 60 bytes, and the packet size is not uniformly distributed.
+Moreover, 90\% of the packet are less than or equal to approximately 50 bytes, and 90\% of the packets are less than or equal to approximately 65 bytes.
+
+The CDF is implemented in the \texttt{cdf.py} file, which is shown in the appendix (lst.\ref{cdf}).
+
+\section{Assignment 3:\\ Complementary Cumulative Distribuntion Function (CCDF)}
+Complementary Cumulative Distribution Function (CCDF) is a function that describes the probability that a random variable takes on a value greater than a given value as follows:
+\begin{align}
+	\mathit{CCDF}(x) = P(X > x) = 1 - \mathit{CDF}(x)
+\end{align}
+,where \(X\) is a random variable and \(x\) is a given value.
+
+As the requairement of the assignment, the CCDF is plotted in a log scale, and the fitting line is drawn by the least squares method.
+\subsection{Fitting Line by Least Squares Method}
+The given dataset \(\{(x_i,y_i)\in\mathbb{R}^2\mid 1\leq i\leq n\}\),
+the best-fitting line \(y = ax + b\) is obtained by minimizing the sum of squared errors:
+\begin{align}
+	\varepsilon(a,b) & = \sum_{i=1}^{n} (y_i - (ax_i + b))^2
+\end{align}
+\(a\) and \(b\) are the slope and the intercept of the line, respectively.
+The values of \(a\) and \(b\) that minimize \(\varepsilon(a,b)\) are obtained by setting the partial derivatives of \(\varepsilon(a,b)\) with respect to \(a\) and \(b\) to zero:
+\begin{align}
+	 & \left\{
+	\begin{aligned}
+		\frac{\partial}{\partial a}\varepsilon(a,b) & = 0 \\
+		\frac{\partial}{\partial b}\varepsilon(a,b) & = 0
+	\end{aligned}
+	\right.
+	\quad\Leftrightarrow
+	\left\{
+	\begin{aligned}
+		 & -2\sum_{i=1}^{n} x_i(y_i - (ax_i + b)) = 0 \\
+		 & -2\sum_{i=1}^{n} (y_i - (ax_i + b))    = 0
+	\end{aligned}
+	\right.
+	\quad\Leftrightarrow
+	\left\{
+	\begin{aligned}
+		 & \sum_{i=1}^{n} x_iy_i = a\sum_{i=1}^{n} x_i^2 + b\sum_{i=1}^{n} x_i \\
+		 & \sum_{i=1}^{n} y_i = a\sum_{i=1}^{n} x_i + nb
+	\end{aligned}
+	\right.               \notag \\
+	\quad\Leftrightarrow
+	 & \left\{
+	\begin{aligned}
+		 & \frac{\sum_{i=1}^{n}x_iy_i}{n} = a\frac{\sum_{i=1}^{n}x_i^2}{n} + b\frac{\sum_{i=1}^{n}x_i}{n} \\
+		 & \frac{\sum_{i=1}^{n}y_i}{n} = a\frac{\sum_{i=1}^{n}x_i}{n} + b
+	\end{aligned}
+	\right.
+	\quad\Leftrightarrow
+	\left\{
+	\begin{aligned}
+		 & \overline{xy} = a\overline{x^2} + b\overline{x} \\
+		 & b = \overline{y} - a\overline{x}
+	\end{aligned}
+	\right.
+	\quad\Leftrightarrow
+	\left\{
+	\begin{aligned}
+		 & a = \frac{\overline{xy} - \overline{x}\cdot\overline{y}}{\overline{x^2} - \overline{x}^2} \\
+		 & b = \overline{y} - a\overline{x}
+	\end{aligned}
+	\right.
+\end{align}
+,where \(\overline{x}\) and \(\overline{y}\) are the means of \(x_i\) and \(y_i\), respectively, and \(\overline{xy}\) is the mean of the product of \(x_i\) and \(y_i\).
+Hence, the equation of the best-fitting line is given by:
+\begin{align}
+	y = \frac{\overline{xy} - \overline{x}\cdot\overline{y}}{\overline{x^2} - \overline{x}^2}x + \left(\overline{y} - \frac{\overline{xy} - \overline{x}\cdot\overline{y}}{\overline{x^2} - \overline{x}^2}\overline{x}\right)
+\end{align}
+\subsection{CCDF Plot}
+The CCDF is shown in Figure \ref{fig:ccdf}.
+To speed up the processing of packet data, the data is handled directly using bit manipulation techniques, bypassing the overhead of \texttt{Scapy}’s abstraction.
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=0.8\textwidth,keepaspectratio]{../src/plot_ccdf.pdf}
+	\caption{Complementary Cumulative Distribution Function (CCDF)}
+	\label{fig:ccdf}
+\end{figure}
+
+The plotted CCDF is close to a straight line on a semi-log scale,
+which suggests that the inter-arrival time may follow an exponential distribution.
+In the range above 50 ms, the CCDF is higher than the fitting line, indicating that shorter inter-arrival times occur more frequently than expected.
+This network behavior appears to be normal.
+\clearpage
+\appendix
+\section{Appendix: Code for Time-Series Analysis}
+\subsection{Environment Setup}
+\lstinputlisting[label={Dockerfile},caption={\texttt{Dockerfile}}]{../Dockerfile}
+\lstinputlisting[label={docker-compose},caption={\texttt{docker-compose}}]{../docker-compose.yml}
+\lstinputlisting[label={requirements},caption={\texttt{requirements.txt}}]{../requirements.txt}
+\lstinputlisting[label={utils},caption={\texttt{utils.py}}]{../src/utils.py}
+\section{Assignment 1:\\ Time-Series Analysis}
+\lstinputlisting[label={time-series},caption={\texttt{time-series.py}}]{../src/time-series.py}
+\section{Assignment 2:\\ Cumulative Distribution Function (CDF)}
+\lstinputlisting[label={cdf},caption={\texttt{cdf.py}}]{../src/cdf.py}
+\section{Assignment 3:\\ Complementary Cumulative Distribution Function (CCDF)}
+\lstinputlisting[label={ccdf},caption={\texttt{ccdf.py}}]{../src/ccdf.py}
+\end{document}
