@@ -71,8 +71,8 @@ plt.legend()
 plt.tight_layout()
 plt.savefig('plot_time_series.pdf')
 
-plt.axhline(y=get_mean(trafic_volume), color='black', linestyle='-.', label=f'Average ({get_mean(trafic_volume):.2f})')
-plt.axhline(y=get_median(trafic_volume), color='black', linestyle='-', label=f'Median  ({get_median(trafic_volume):.2f})')
+plt.axhline(y=get_mean(trafic_volume), color='black', linestyle=':', label=f'Average ({get_mean(trafic_volume):.2f})')
+plt.axhline(y=get_median(trafic_volume), color='black', linestyle='--', label=f'Median  ({get_median(trafic_volume):.2f})')
 plt.legend()
 
 plt.savefig('plot_time_series_avg-median.pdf')

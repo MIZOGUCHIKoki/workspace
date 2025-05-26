@@ -145,7 +145,6 @@ def verify_sorted(lst, original):
 			lst_copy[j] = lst_copy[j + 1]
 		lst_copy[len(lst) - 1] = None
 		lst_len -= 1
-		# print("bxs_index: ", bs_index, "lst_copy: ", lst_copy, "lst_len: ", lst_len)
 
 	if (lst_len != 0):
 		raise ValueError("The sorted list contains elements that are not in the original list.")

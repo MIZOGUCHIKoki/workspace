@@ -125,7 +125,7 @@ def format_times(x, pos):
 	return f'{x * 1000:.0f} '
 
 plt.figure(figsize=(10, 5))
-plt.plot(sorted_inter_arrival_time, ccdf_log, linestyle='-', label='CCDF of Inter-Arrival Times', drawstyle='default', linewidth=1.5, color='#1f77b4')
+plt.plot(sorted_inter_arrival_time, ccdf_log, linestyle='-', label='CCDF of Inter-Arrival Times', drawstyle='steps-post', linewidth=1.5, color='#1f77b4')
 plt.plot(sorted_inter_arrival_time, y, linestyle='--', label = f'Linear Fit $y={a:.3f}x + {b:.3f}$', drawstyle='default', linewidth=1.5, color='#ff7f0e')
 plt.title('CCDF of Inter-Arrival Times of TCP SYN Packets')
 plt.xlabel('Inter-Arrival Time (ms) [x]')
