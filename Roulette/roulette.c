@@ -10,9 +10,10 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-unsigned short genRN(unsigned short total);
+unsigned short genRN(unsigned short total, int fd);
 void deleteEmptyElement(unsigned short *array, unsigned short arrayLength);
 void printArray(unsigned short *array, unsigned short arrayLength);
 
@@ -47,10 +48,15 @@ int main(int argc, char *argv[])
   printf("%-5s | %-8s\n", "ORDER", "Identity");
   printf("------+----------\n");
 
+
+	int fd = open("/dev/random", O_RDONLY);
+	if (fd == -1) {
+		perror("open");
+		exit(1);
+	}
   while (1)
   {
-    srand((unsigned int)time(NULL) * (counter + 1)); // set the random seed
-    tmp = genRN(total);                              // Generate a random number
+    tmp = genRN(total, fd);                              // Generate a random number
     printf("%5d | %8d\n", counter + 1, num[tmp]);
     num[tmp] = 0;
     deleteEmptyElement(num, cTotal);
@@ -60,12 +66,19 @@ int main(int argc, char *argv[])
       break;
   }
   printf("------+----------\n");
+	close(fd);
   return 0;
 }
 
-unsigned short genRN(unsigned short total)
+unsigned short genRN(unsigned short total, int fd)
 {
-  return (rand() % total);
+	int random_number;
+	if (read(fd, &random_number, sizeof(random_number)) != sizeof(random_number)) {
+		perror("read");
+		close(fd);
+		exit(1);
+	}
+  return ((unsigned int)random_number % total);
 }
 
 void deleteEmptyElement(unsigned short *array, unsigned short arrayLength)
