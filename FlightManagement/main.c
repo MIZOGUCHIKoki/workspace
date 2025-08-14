@@ -11,23 +11,26 @@ struct mileage {
 
 struct flight {
   unsigned int date;
-  char dep[3];
+  char dep[4];
   unsigned short int dep_time;
-  char arr[3];
+  char arr[4];
   unsigned short int arr_time;
-  char iata[2];
+  char iata[3];
   unsigned short int code;
-  char booking[6];
+  char class[2];
+  char booking[7];
 };
 
-size_t size_formatted_date = 19; // 2[dd] + sp + 10[mm] + , + sp + 4[yy] = 19
-size_t size_flight_data = 35; // 35[data] + \n + \0
+size_t size_formatted_date = 19;
+size_t size_flight_data = 44;
+
 void print_mileage(struct mileage *m);
 void print_date(unsigned int date, char *result);
 void error_handling(FILE *fp1, FILE *fp2);
 unsigned short int mileage_p(struct mileage *mileage, FILE *fp_mileage);
 short int count_flight(FILE *fp_flight);
 unsigned short int flights_p(struct flight *flight, FILE *fp_flights, short int flights);
+
 int main() {
   FILE *fp_mileage = fopen("mileage.csv", "r");
   if (fp_mileage == NULL){
@@ -55,6 +58,19 @@ int main() {
   struct flight flight[flights];
   flights_p(flight, fp_flights, flights);
   
+  int i, j;
+  char result[size_formatted_date];
+  printf("\n");
+  for (i = 0; i < flights; i++) {
+    print_date(flight[i].date, result);
+    printf("%10s | ", result);
+    printf("%3s | ", flight[i].dep);
+    printf("%3s | ", flight[i].arr);
+    printf("\n");
+  }
+
+  fclose(fp_flights);
+  return 0;
 }
 
 void error_handling(FILE *fp1, FILE *fp2) {
@@ -165,11 +181,13 @@ unsigned short int flights_p(struct flight *flight, FILE *fp_flights, short int 
   char code[3];
   char fare[1];
   char booking[6];
-  size_t ret, ret2;
-  int i, j;
+  int i, j = 0;
+  unsigned int tmp;
+  size_t ret2;
   char *token;
   while (1) {
-    if (counter <= 0) {
+    i = 0;
+    if (counter < 0) {
       perror("struct flight may overflow buffer");
       return 1;
     }
@@ -181,9 +199,50 @@ unsigned short int flights_p(struct flight *flight, FILE *fp_flights, short int 
     while (1) {
       if (token == 0)
         break;
-      printf("token: %s\n", token);
+      //printf("token: %s\n", token);
+      //printf("`--%d-%d\n", j, i);
+      switch (i) {
+        case 0:
+          flight[j].date = (unsigned int)atoi(token);
+          break;
+        case 1:
+          flight[j].dep_time = (unsigned short int)atoi(token);
+          break;
+        case 2:
+          flight[j].arr_time = (unsigned short int)atoi(token);
+          break;
+        case 3:
+          strncpy(flight[j].dep, token, 3);
+          flight[j].dep[sizeof(flight[j].dep) - 1] = '\0';
+          break;
+        case 4:
+          strncpy(flight[j].arr, token, 3);
+          flight[j].arr[sizeof(flight[j].arr) - 1] = '\0';
+          break;
+        case 5:
+          strncpy(flight[j].iata, token, 2);
+          flight[j].iata[sizeof(flight[j].iata) - 1] = '\0';
+          break;
+        case 6:
+          flight[j].code = (unsigned short int)atoi(token);
+          break;
+        case 7:
+          strncpy(flight[j].class, token, 1);
+          flight[j].class[sizeof(flight[j].class) - 1] = '\0';
+          break;
+        case 8:
+          strncpy(flight[j].booking, token, 6);
+          flight[j].booking[sizeof(flight[j].booking) - 1] = '\0';
+          break;
+        default:
+          perror("Invalid flights data");
+          return 1;
+      }
+      i++;
       token = strtok(NULL, ",");
     }
+    counter--;
+    j++;
   }
   return 0;
 }
