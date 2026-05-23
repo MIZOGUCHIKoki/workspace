@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-タイピング一括評価プログラム（8分固定）
+タイピング一括評価プログラム（8分固定・50点満点対応）
 
 使い方：
   python3 typing_evaluator_batch.py original.txt 15 --csv result.csv
@@ -18,6 +18,10 @@ import csv
 import re
 import unicodedata
 from pathlib import Path
+
+
+# 50点満点
+FULL_SCORE = 50
 
 
 def remove_ruby_and_latex(text: str) -> str:
@@ -73,6 +77,7 @@ def levenshtein_alignment(original: str, typed: str):
 
     i, j = n, m
     operations = []
+
     while i > 0 or j > 0:
         if i > 0 and j > 0:
             cost = 0 if original[i - 1] == typed[j - 1] else 1
@@ -96,7 +101,13 @@ def levenshtein_alignment(original: str, typed: str):
     return dp[n][m], operations
 
 
-def evaluate(original_text: str, typed_text: str, minutes: float = 8, ignore_spaces: bool = True):
+def evaluate(
+    original_text: str,
+    typed_text: str,
+    minutes: float = 8,
+    ignore_spaces: bool = True,
+    full_score: float = FULL_SCORE
+):
     original = normalize_text(original_text, ignore_spaces=ignore_spaces)
     typed = normalize_text(typed_text, ignore_spaces=ignore_spaces)
 
@@ -104,15 +115,37 @@ def evaluate(original_text: str, typed_text: str, minutes: float = 8, ignore_spa
 
     original_chars = len(original)
     typed_chars = len(typed)
+
     correct_chars = sum(1 for op, _, _, _, _ in operations if op == 'match')
     replace_count = sum(1 for op, _, _, _, _ in operations if op == 'replace')
     insert_count = sum(1 for op, _, _, _, _ in operations if op == 'insert')
     delete_count = sum(1 for op, _, _, _, _ in operations if op == 'delete')
 
+    # 正確率：入力した文字のうち、正しかった割合
     accuracy = correct_chars / typed_chars if typed_chars else 0
+
+    # 進捗：元テキスト全体に対してどこまで入力したか
     progress = min(typed_chars / original_chars, 1) if original_chars else 0
+
+    # 速度：正解文字数 ÷ 分
     speed_cpm = correct_chars / minutes if minutes else 0
+
+    # 総合スコア
     score = speed_cpm * accuracy * (0.5 + 0.5 * progress)
+
+    # 理論上の最大スコア
+    # 全文を正確に打った場合：
+    # speed_cpm = original_chars / minutes
+    # accuracy = 1
+    # progress = 1
+    # score = original_chars / minutes
+    max_score = original_chars / minutes if minutes and original_chars else 0
+
+    # 50点満点などに換算
+    if max_score > 0:
+        point = min(score / max_score, 1.0) * full_score
+    else:
+        point = 0
 
     return {
         '元テキスト文字数': original_chars,
@@ -124,6 +157,8 @@ def evaluate(original_text: str, typed_text: str, minutes: float = 8, ignore_spa
         '進捗_percent': progress * 100,
         '速度_CPM': speed_cpm,
         '総合スコア': score,
+        '得点': point,
+        '満点': full_score,
         '編集距離': distance,
         '置換ミス数': replace_count,
         '余分な文字数': insert_count,
@@ -135,11 +170,13 @@ def read_text_safely(path: Path) -> str:
     """UTF-8優先。失敗したらShift_JIS系も試す。"""
     encodings = ['utf-8', 'utf-8-sig', 'cp932', 'shift_jis']
     last_error = None
+
     for enc in encodings:
         try:
             return path.read_text(encoding=enc)
         except UnicodeDecodeError as e:
             last_error = e
+
     raise last_error
 
 
@@ -148,18 +185,63 @@ def collect_files(input_dir: Path, pattern: str = '*.txt', recursive: bool = Fal
         files = sorted(input_dir.rglob(pattern))
     else:
         files = sorted(input_dir.glob(pattern))
+
     return [p for p in files if p.is_file()]
 
 
 def main():
-    parser = argparse.ArgumentParser(description='ディレクトリ内の入力txtを一括でタイピング評価してCSV出力します。')
-    parser.add_argument('original_file', help='元テキストファイル。ruby付きLaTeXでも可。')
-    parser.add_argument('input_dir', help='生徒の入力txtが入っているディレクトリ。例: 15')
-    parser.add_argument('--csv', default='typing_results.csv', help='出力CSV名。初期値: typing_results.csv')
-    parser.add_argument('--minutes', type=float, default=8, help='制限時間。初期値は8分。')
-    parser.add_argument('--pattern', default='*.txt', help='対象ファイルのパターン。初期値: *.txt')
-    parser.add_argument('--recursive', action='store_true', help='サブディレクトリ内も対象にする。')
-    parser.add_argument('--keep-spaces', action='store_true', help='空白・改行も評価対象にする。')
+    parser = argparse.ArgumentParser(
+        description='ディレクトリ内の入力txtを一括でタイピング評価してCSV出力します。'
+    )
+
+    parser.add_argument(
+        'original_file',
+        help='元テキストファイル。ruby付きLaTeXでも可。'
+    )
+
+    parser.add_argument(
+        'input_dir',
+        help='生徒の入力txtが入っているディレクトリ。例: 15'
+    )
+
+    parser.add_argument(
+        '--csv',
+        default='typing_results.csv',
+        help='出力CSV名。初期値: typing_results.csv'
+    )
+
+    parser.add_argument(
+        '--minutes',
+        type=float,
+        default=8,
+        help='制限時間。初期値は8分。'
+    )
+
+    parser.add_argument(
+        '--full-score',
+        type=float,
+        default=FULL_SCORE,
+        help='満点。初期値は50点。'
+    )
+
+    parser.add_argument(
+        '--pattern',
+        default='*.txt',
+        help='対象ファイルのパターン。初期値: *.txt'
+    )
+
+    parser.add_argument(
+        '--recursive',
+        action='store_true',
+        help='サブディレクトリ内も対象にする。'
+    )
+
+    parser.add_argument(
+        '--keep-spaces',
+        action='store_true',
+        help='空白・改行も評価対象にする。'
+    )
+
     args = parser.parse_args()
 
     original_path = Path(args.original_file)
@@ -168,6 +250,7 @@ def main():
 
     if not original_path.is_file():
         raise FileNotFoundError(f'元テキストファイルが見つかりません: {original_path}')
+
     if not input_dir.is_dir():
         raise NotADirectoryError(f'入力ディレクトリが見つかりません: {input_dir}')
 
@@ -190,6 +273,8 @@ def main():
         '進捗_percent',
         '速度_CPM',
         '総合スコア',
+        '得点',
+        '満点',
         '編集距離',
         '置換ミス数',
         '余分な文字数',
@@ -197,22 +282,35 @@ def main():
     ]
 
     rows = []
+
     for file_path in files:
         try:
             typed_text = read_text_safely(file_path)
+
             result = evaluate(
                 original_text,
                 typed_text,
                 minutes=args.minutes,
                 ignore_spaces=not args.keep_spaces,
+                full_score=args.full_score,
             )
+
             row = {
                 'ファイル名': file_path.name,
                 '相対パス': str(file_path.relative_to(input_dir)),
                 **result,
             }
+
             rows.append(row)
-            print(f'OK: {file_path.name} / 正確率 {result["正確率_percent"]:.2f}% / 進捗 {result["進捗_percent"]:.2f}% / 速度 {result["速度_CPM"]:.2f}')
+
+            print(
+                f'OK: {file_path.name} / '
+                f'正確率 {result["正確率_percent"]:.2f}% / '
+                f'進捗 {result["進捗_percent"]:.2f}% / '
+                f'速度 {result["速度_CPM"]:.2f} / '
+                f'得点 {result["得点"]:.2f}/{result["満点"]:.0f}'
+            )
+
         except Exception as e:
             # 失敗したファイルもCSVに残す
             row = {name: '' for name in fieldnames}
@@ -220,6 +318,7 @@ def main():
             row['相対パス'] = str(file_path.relative_to(input_dir))
             row['総合スコア'] = f'ERROR: {e}'
             rows.append(row)
+
             print(f'ERROR: {file_path.name} / {e}')
 
     with csv_path.open('w', encoding='utf-8-sig', newline='') as f:
