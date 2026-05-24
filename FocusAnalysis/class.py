@@ -5,7 +5,8 @@ from icalendar import Calendar
 from datetime import datetime, timedelta
 import dateutil.rrule
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 # 🌟 提供されたiCloudカレンダーのURLを設定
 CALENDAR_URL = os.getenv("CAL_URL")
 OUTPUT_CSV = "class.csv"
