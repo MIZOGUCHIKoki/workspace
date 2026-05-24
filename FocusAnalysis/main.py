@@ -8,7 +8,7 @@ import seaborn as sns
 # ==========================================
 # 集計したい期間を指定してください（YYYY-MM-DD 形式、None の場合は制限なし）
 START_DATE = "2026-04-01"
-END_DATE   = "2026-05-18"
+END_DATE   = "2026-05-24"
 
 # 指定のファイル名に設定
 FOCUS_DATA = "focus.csv"
