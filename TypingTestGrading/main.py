@@ -3,14 +3,24 @@
 """
 タイピング一括評価プログラム（8分固定・50点満点対応）
 
-使い方：
-  python3 typing_evaluator_batch.py original.txt 15 --csv result.csv
-  python3 typing_evaluator_batch.py original.txt 15 --pattern "*.txt" --csv result.csv
-  python3 typing_evaluator_batch.py original.txt 15 --recursive --csv result.csv
-  python3 typing_evaluator_batch.py original.txt 15 --keep-spaces --csv result.csv
+csv配下の各フォルダを一括評価し、
+result_フォルダ名.csv に書き出す。
 
-original.txt : 元テキスト。LaTeXの \ruby[m]{近年}{きん|ねん} を含むままでOK。
-input_dir    : 生徒の入力txtが入っているディレクトリ。
+使い方：
+  python3 typing_evaluator_batch.py original.txt csv
+
+例：
+  csv/
+  ├── 05-29-13/
+  ├── exam-13/
+  ├── exam-14/
+  └── exam-15/
+
+実行後：
+  result_05-29-13.csv
+  result_exam-13.csv
+  result_exam-14.csv
+  result_exam-15.csv
 """
 
 import argparse
@@ -70,9 +80,9 @@ def levenshtein_alignment(original: str, typed: str):
         for j in range(1, m + 1):
             cost = 0 if oi == typed[j - 1] else 1
             dp[i][j] = min(
-                dp[i - 1][j] + 1,       # delete
-                dp[i][j - 1] + 1,       # insert
-                dp[i - 1][j - 1] + cost # match/replace
+                dp[i - 1][j] + 1,        # delete
+                dp[i][j - 1] + 1,        # insert
+                dp[i - 1][j - 1] + cost  # match/replace
             )
 
     i, j = n, m
@@ -134,11 +144,6 @@ def evaluate(
     score = speed_cpm * accuracy * (0.5 + 0.5 * progress)
 
     # 理論上の最大スコア
-    # 全文を正確に打った場合：
-    # speed_cpm = original_chars / minutes
-    # accuracy = 1
-    # progress = 1
-    # score = original_chars / minutes
     max_score = original_chars / minutes if minutes and original_chars else 0
 
     # 50点満点などに換算
@@ -181,6 +186,7 @@ def read_text_safely(path: Path) -> str:
 
 
 def collect_files(input_dir: Path, pattern: str = '*.txt', recursive: bool = False):
+    """指定ディレクトリ内の対象ファイルを集める。"""
     if recursive:
         files = sorted(input_dir.rglob(pattern))
     else:
@@ -189,9 +195,99 @@ def collect_files(input_dir: Path, pattern: str = '*.txt', recursive: bool = Fal
     return [p for p in files if p.is_file()]
 
 
+def evaluate_directory(
+    original_text: str,
+    target_dir: Path,
+    output_csv: Path,
+    minutes: float,
+    full_score: float,
+    pattern: str,
+    recursive: bool,
+    keep_spaces: bool,
+):
+    """1つのフォルダを評価してCSVに書き出す。"""
+
+    fieldnames = [
+        'フォルダ名',
+        'ファイル名',
+        '相対パス',
+        '元テキスト文字数',
+        '入力文字数',
+        '正解文字数',
+        '正確率',
+        '正確率_percent',
+        '進捗',
+        '進捗_percent',
+        '速度_CPM',
+        '総合スコア',
+        '得点',
+        '満点',
+        '編集距離',
+        '置換ミス数',
+        '余分な文字数',
+        '抜けた文字数',
+    ]
+
+    files = collect_files(target_dir, pattern=pattern, recursive=recursive)
+
+    if not files:
+        print(f'対象ファイルなし: {target_dir}')
+        return 0
+
+    rows = []
+
+    for file_path in files:
+        try:
+            typed_text = read_text_safely(file_path)
+
+            result = evaluate(
+                original_text,
+                typed_text,
+                minutes=minutes,
+                ignore_spaces=not keep_spaces,
+                full_score=full_score,
+            )
+
+            row = {
+                'フォルダ名': target_dir.name,
+                'ファイル名': file_path.name,
+                '相対パス': str(file_path.relative_to(target_dir)),
+                **result,
+            }
+
+            rows.append(row)
+
+            print(
+                f'OK: {target_dir.name}/{file_path.name} / '
+                f'正確率 {result["正確率_percent"]:.2f}% / '
+                f'進捗 {result["進捗_percent"]:.2f}% / '
+                f'速度 {result["速度_CPM"]:.2f} / '
+                f'得点 {result["得点"]:.2f}/{result["満点"]:.0f}'
+            )
+
+        except Exception as e:
+            # 失敗したファイルもCSVに残す
+            row = {name: '' for name in fieldnames}
+            row['フォルダ名'] = target_dir.name
+            row['ファイル名'] = file_path.name
+            row['相対パス'] = str(file_path.relative_to(target_dir))
+            row['総合スコア'] = f'ERROR: {e}'
+            rows.append(row)
+
+            print(f'ERROR: {target_dir.name}/{file_path.name} / {e}')
+
+    with output_csv.open('w', encoding='utf-8-sig', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f'出力完了: {len(rows)}件 -> {output_csv}')
+    return len(rows)
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description='ディレクトリ内の入力txtを一括でタイピング評価してCSV出力します。'
+        description='csv配下の各フォルダ内のtxtを一括でタイピング評価して、result_フォルダ名.csvに出力します。'
     )
 
     parser.add_argument(
@@ -200,14 +296,8 @@ def main():
     )
 
     parser.add_argument(
-        'input_dir',
-        help='生徒の入力txtが入っているディレクトリ。例: 15'
-    )
-
-    parser.add_argument(
-        '--csv',
-        default='typing_results.csv',
-        help='出力CSV名。初期値: typing_results.csv'
+        'root_dir',
+        help='評価対象フォルダ群が入っている親ディレクトリ。例: csv'
     )
 
     parser.add_argument(
@@ -233,7 +323,7 @@ def main():
     parser.add_argument(
         '--recursive',
         action='store_true',
-        help='サブディレクトリ内も対象にする。'
+        help='各フォルダのサブディレクトリ内も対象にする。'
     )
 
     parser.add_argument(
@@ -242,92 +332,55 @@ def main():
         help='空白・改行も評価対象にする。'
     )
 
+    parser.add_argument(
+        '--output-dir',
+        default='out/',
+        help='結果CSVの出力先ディレクトリ。初期値はカレントディレクトリ。'
+    )
+
     args = parser.parse_args()
 
     original_path = Path(args.original_file)
-    input_dir = Path(args.input_dir)
-    csv_path = Path(args.csv)
+    root_dir = Path(args.root_dir)
+    output_dir = Path(args.output_dir)
 
     if not original_path.is_file():
         raise FileNotFoundError(f'元テキストファイルが見つかりません: {original_path}')
 
-    if not input_dir.is_dir():
-        raise NotADirectoryError(f'入力ディレクトリが見つかりません: {input_dir}')
+    if not root_dir.is_dir():
+        raise NotADirectoryError(f'親ディレクトリが見つかりません: {root_dir}')
+
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     original_text = read_text_safely(original_path)
-    files = collect_files(input_dir, pattern=args.pattern, recursive=args.recursive)
 
-    if not files:
-        print(f'対象ファイルがありません: {input_dir} / pattern={args.pattern}')
+    # root_dir直下のフォルダを対象にする
+    target_dirs = sorted([p for p in root_dir.iterdir() if p.is_dir()])
+
+    if not target_dirs:
+        print(f'評価対象フォルダがありません: {root_dir}')
         return
 
-    fieldnames = [
-        'ファイル名',
-        '相対パス',
-        '元テキスト文字数',
-        '入力文字数',
-        '正解文字数',
-        '正確率',
-        '正確率_percent',
-        '進捗',
-        '進捗_percent',
-        '速度_CPM',
-        '総合スコア',
-        '得点',
-        '満点',
-        '編集距離',
-        '置換ミス数',
-        '余分な文字数',
-        '抜けた文字数',
-    ]
+    total_files = 0
 
-    rows = []
+    for target_dir in target_dirs:
+        output_csv = output_dir / f'result_{target_dir.name}.csv'
 
-    for file_path in files:
-        try:
-            typed_text = read_text_safely(file_path)
+        count = evaluate_directory(
+            original_text=original_text,
+            target_dir=target_dir,
+            output_csv=output_csv,
+            minutes=args.minutes,
+            full_score=args.full_score,
+            pattern=args.pattern,
+            recursive=args.recursive,
+            keep_spaces=args.keep_spaces,
+        )
 
-            result = evaluate(
-                original_text,
-                typed_text,
-                minutes=args.minutes,
-                ignore_spaces=not args.keep_spaces,
-                full_score=args.full_score,
-            )
-
-            row = {
-                'ファイル名': file_path.name,
-                '相対パス': str(file_path.relative_to(input_dir)),
-                **result,
-            }
-
-            rows.append(row)
-
-            print(
-                f'OK: {file_path.name} / '
-                f'正確率 {result["正確率_percent"]:.2f}% / '
-                f'進捗 {result["進捗_percent"]:.2f}% / '
-                f'速度 {result["速度_CPM"]:.2f} / '
-                f'得点 {result["得点"]:.2f}/{result["満点"]:.0f}'
-            )
-
-        except Exception as e:
-            # 失敗したファイルもCSVに残す
-            row = {name: '' for name in fieldnames}
-            row['ファイル名'] = file_path.name
-            row['相対パス'] = str(file_path.relative_to(input_dir))
-            row['総合スコア'] = f'ERROR: {e}'
-            rows.append(row)
-
-            print(f'ERROR: {file_path.name} / {e}')
-
-    with csv_path.open('w', encoding='utf-8-sig', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+        total_files += count
 
     print()
-    print(f'完了: {len(rows)}件をCSVに出力しました -> {csv_path}')
+    print(f'すべて完了: {len(target_dirs)}フォルダ / {total_files}ファイルを処理しました。')
 
 
 if __name__ == '__main__':
