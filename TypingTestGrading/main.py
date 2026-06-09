@@ -3,24 +3,37 @@
 """
 タイピング一括評価プログラム（8分固定・50点満点対応）
 
-csv配下の各フォルダを一括評価し、
-result_フォルダ名.csv に書き出す。
-
-使い方：
-  python3 typing_evaluator_batch.py original.txt csv
+original-N.txt / original-N.csv に対して、
+csv/N-xxx フォルダだけを評価し、
+out/result_N-xxx.csv に書き出す。
 
 例：
-  csv/
-  ├── 05-29-13/
-  ├── exam-13/
-  ├── exam-14/
-  └── exam-15/
+  original-1.txt に対して：
+    csv/1-05-29-13/
+    csv/1-05-29-15/
+    csv/1-06-02-14/
+    csv/1-06-05-13/
+    csv/1-06-05-15/
+    csv/1-exam-13/
+    csv/1-exam-14/
+    csv/1-exam-15/
 
-実行後：
-  result_05-29-13.csv
-  result_exam-13.csv
-  result_exam-14.csv
-  result_exam-15.csv
+  original-2.txt に対して：
+    csv/2-xxxx/
+    のみを見る。
+
+使い方：
+  python3 main.py original-1.txt
+  python3 main.py original-1.csv
+  python3 main.py original-2.txt
+
+必要なら親フォルダを指定：
+  python3 main.py original-1.txt csv
+
+出力：
+  out/result_1-05-29-13.csv
+  out/result_1-exam-13.csv
+  ...
 """
 
 import argparse
@@ -195,8 +208,43 @@ def collect_files(input_dir: Path, pattern: str = '*.txt', recursive: bool = Fal
     return [p for p in files if p.is_file()]
 
 
+def extract_original_number(original_path: Path) -> str:
+    """
+    original-1.txt / original-1.csv のようなファイル名から 1 を取り出す。
+    original-2.txt / original-2.csv なら 2。
+    """
+    match = re.match(r'^original-(\d+)\.', original_path.name)
+
+    if not match:
+        raise ValueError(
+            f'元テキスト名は original-数字.拡張子 の形式にしてください: {original_path.name}\n'
+            f'例: original-1.txt, original-1.csv, original-2.txt'
+        )
+
+    return match.group(1)
+
+
+def collect_target_dirs(root_dir: Path, original_number: str):
+    """
+    original_number に対応する csv/N-xxx フォルダだけを集める。
+
+    例：
+      original_number='1' -> csv/1-* のみ
+      original_number='2' -> csv/2-* のみ
+    """
+    prefix = f'{original_number}-'
+
+    target_dirs = sorted([
+        p for p in root_dir.iterdir()
+        if p.is_dir() and p.name.startswith(prefix)
+    ])
+
+    return target_dirs
+
+
 def evaluate_directory(
     original_text: str,
+    original_file_name: str,
     target_dir: Path,
     output_csv: Path,
     minutes: float,
@@ -208,6 +256,7 @@ def evaluate_directory(
     """1つのフォルダを評価してCSVに書き出す。"""
 
     fieldnames = [
+        '元ファイル',
         'フォルダ名',
         'ファイル名',
         '相対パス',
@@ -249,6 +298,7 @@ def evaluate_directory(
             )
 
             row = {
+                '元ファイル': original_file_name,
                 'フォルダ名': target_dir.name,
                 'ファイル名': file_path.name,
                 '相対パス': str(file_path.relative_to(target_dir)),
@@ -268,6 +318,7 @@ def evaluate_directory(
         except Exception as e:
             # 失敗したファイルもCSVに残す
             row = {name: '' for name in fieldnames}
+            row['元ファイル'] = original_file_name
             row['フォルダ名'] = target_dir.name
             row['ファイル名'] = file_path.name
             row['相対パス'] = str(file_path.relative_to(target_dir))
@@ -287,17 +338,19 @@ def evaluate_directory(
 
 def main():
     parser = argparse.ArgumentParser(
-        description='csv配下の各フォルダ内のtxtを一括でタイピング評価して、result_フォルダ名.csvに出力します。'
+        description='original-N に対応する csv/N-xxx フォルダだけを評価して、out/result_N-xxx.csv に出力します。'
     )
 
     parser.add_argument(
         'original_file',
-        help='元テキストファイル。ruby付きLaTeXでも可。'
+        help='元テキストファイル。例: original-1.txt / original-1.csv / original-2.txt'
     )
 
     parser.add_argument(
         'root_dir',
-        help='評価対象フォルダ群が入っている親ディレクトリ。例: csv'
+        nargs='?',
+        default='csv',
+        help='評価対象フォルダ群が入っている親ディレクトリ。初期値: csv'
     )
 
     parser.add_argument(
@@ -334,8 +387,8 @@ def main():
 
     parser.add_argument(
         '--output-dir',
-        default='out/',
-        help='結果CSVの出力先ディレクトリ。初期値はカレントディレクトリ。'
+        default='out',
+        help='結果CSVの出力先ディレクトリ。初期値: out'
     )
 
     args = parser.parse_args()
@@ -352,14 +405,22 @@ def main():
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    original_text = read_text_safely(original_path)
+    # original-1.txt / original-1.csv から 1 を取り出す
+    original_number = extract_original_number(original_path)
 
-    # root_dir直下のフォルダを対象にする
-    target_dirs = sorted([p for p in root_dir.iterdir() if p.is_dir()])
+    # csv/1-* だけを対象にする
+    target_dirs = collect_target_dirs(root_dir, original_number)
 
     if not target_dirs:
-        print(f'評価対象フォルダがありません: {root_dir}')
+        print(f'評価対象フォルダがありません: {root_dir}/{original_number}-*')
         return
+
+    print(f'元ファイル: {original_path}')
+    print(f'対象フォルダ条件: {root_dir}/{original_number}-*')
+    print(f'出力先: {output_dir}')
+    print()
+
+    original_text = read_text_safely(original_path)
 
     total_files = 0
 
@@ -368,6 +429,7 @@ def main():
 
         count = evaluate_directory(
             original_text=original_text,
+            original_file_name=original_path.name,
             target_dir=target_dir,
             output_csv=output_csv,
             minutes=args.minutes,
